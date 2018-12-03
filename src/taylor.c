@@ -14,23 +14,21 @@ int main () {
     scanf("%f", &x);
     do
     {
-        term = getTerm(n, x);
-        if (fabs(term) > threshold) {
+        term = getTerm(n, fabs(x));
+        if (term > threshold) {
             cumRes += term;
             printf("\n\n\ncumres is now %f\n\n\n", cumRes);
             n++;
         }
-    } while (fabs(term) > threshold);
-    printf("answer is : %f \n", cumRes);
+    } while (term > threshold);
+    printf("answer is : %f \n", x < 0 ? 1/cumRes : cumRes);
     return 0;
 }
 
 float getTerm(int n, int x) {
     double result = 1;
     for (int i = 1; i <= n; i++) {
-        printf(" calculating term nr %d\t and iteration nr %d\t %f\n", n, i,result);
         result *= (double)x / i;
     }
-    printf("\n\nexit second inner loop result is now %f\n\n", fabs(result));
     return result;
 }
