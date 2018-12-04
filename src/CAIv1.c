@@ -91,6 +91,7 @@ void test(){
     char choice;
     const int numberOfQuestions = 2;
     int i;
+    int correctAnswers = 0;
     struct TestAnalysis analysis[numberOfQuestions];
     printf("\ntest\n");
     choice = submenu();
@@ -106,18 +107,14 @@ void test(){
             testMixed(analysis, numberOfQuestions);
             break;
     }
-    printf("\n  Question\tCorrect Answer\tYour Answer\n");
+    printf("\n  \tQuestion\tCorrect Answer\tYour Answer\n");
     for( i = 0; i < numberOfQuestions; i++){
-        printf("%d.%s\t%d\t%d\n", i + 1, analysis[i].question, analysis[i].correctAnswer, analysis[i].studentAnswer);
+        printf("%d.\t%s\t\t%d\t\t%d\n", i + 1, analysis[i].question, analysis[i].correctAnswer, analysis[i].studentAnswer);
+        correctAnswers += analysis[i].correctAnswer == analysis[i].studentAnswer ? 1 : 0;
     }
-
-    /*
-    choose addition, subtraction, mixed
-    generated 15 questions,
-    record answers and after the test display result as percentage correct if total
-    and question analysis.
-    */
+    printf("\nprecentage score is : %f1\n", (float) correctAnswers / numberOfQuestions);
 }
+
 void testAdditions(struct TestAnalysis *analysis, int numberOfQuestions){
     int i;
     for(i = 0; i < numberOfQuestions ; i++){
@@ -126,10 +123,20 @@ void testAdditions(struct TestAnalysis *analysis, int numberOfQuestions){
 }
 
 void testSubtractions(struct TestAnalysis *analysis, int numberOfQuestions){
-
+    int i;
+    for(i = 0; i < numberOfQuestions; i++){
+        testSubtraction(&analysis[i]);
+    }
 }
 void testMixed(struct TestAnalysis *analysis, int numberOfQuestions){
-
+    int i;
+    for(i = 0; i < numberOfQuestions; i++){
+        if(generateNumber() < 50){
+            testAddition(&analysis[i]);
+        } else {
+            testSubtraction(&analysis[i]);
+        }
+    }
 }
 
 void practiceMixed(){
@@ -168,7 +175,21 @@ void testAddition(struct TestAnalysis *analysis){
     analysis->studentAnswer = ans;
 }
 
-
+void testSubtraction( struct TestAnalysis *analysis){
+    int x, y, ans;
+    x = generateNumber();
+    y = generateNumber();
+    if( x < y){
+        sprintf( analysis->question, "%d - %d", y, x);
+         analysis->correctAnswer = y - x;
+    } else {
+        sprintf(analysis->question, "%d - %d", x, y);
+        analysis->correctAnswer = x - y;
+    }
+    printf("\nwhat is %s : \t", analysis->question);
+    scanf("%d", &ans);
+    analysis->studentAnswer = ans;
+}
 
 void addition(){
     int x, y, ans;
