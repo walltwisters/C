@@ -17,7 +17,6 @@ int main () {
         term = getTerm(n, fabs(x));
         if (term > threshold) {
             cumRes += term;
-            printf("\n\n\ncumres is now %f\n\n\n", cumRes);
             n++;
         }
     } while (term > threshold);
