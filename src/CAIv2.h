@@ -14,3 +14,6 @@ int generateNumber();
 void getTwoNumbers(int *pX, int *pY, int);
 int getNumberFromStdin();
 int assertAnswer(int expected, int provided);
+char* correctAnswer();
+char* inCorrectAnswer();
+char* generateAnswer();

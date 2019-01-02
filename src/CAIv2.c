@@ -48,7 +48,7 @@ void practice(){
     const int addition = 1;
     const int subtraction = 2;
     const int mixed = 3;
-    const int numberOfQuestions = 4;
+    const int numberOfQuestions = 15;
     printf("\nnow you can choose to do practices on:\n");
     choice = selectTypeOfQuestions();
     switch(choice){
@@ -69,14 +69,14 @@ void practice(){
 
 void test(){
     int choice;
-    const int numberOfQuestions = 2;
+    const int numberOfQuestions = 10;
     int correctAnswers = 0;
     const int addition = 1;
     const int subtraction = 2;
     const int mixed = 3;
     int i;
     struct TestAnalysis analysis[numberOfQuestions];
-    printf("\nnow you can choose to do practices on:\n");
+    printf("\nnow you can choose to do test on:\n");
     choice = selectTypeOfQuestions();
     switch(choice){
         case 1:
@@ -166,12 +166,36 @@ void generateQuestionSubtraction(struct TestAnalysis *pAnalysis){
 
 int assertAnswer(int expected, int provided) {
     if (expected == provided) {
-        printf("Bravo. Correct answer\n");
+        printf("%s", correctAnswer());
         return 1;
     } else {
-        printf("Sorry. Wrong answer. Try again\n");
+        printf("%s", inCorrectAnswer());
         return 0;
     }
+}
+
+char* correctAnswer() {
+    char* answers[] = {"Bravo!", "Correct Answer!", "Good!", "Very Good!", "Excellent"};
+    return generateAnswer(answers);
+    
+}
+
+char* generateAnswer(char** answers){
+    int random;
+    random = generateNumber() % 5;
+    return answers[random];
+}
+
+char* inCorrectAnswer() {
+    char* answers[] = 
+        {
+            "Wrong! Try again!",
+            "Learnig takes practice, give it another go", 
+            "not exactly but try again",
+             "wrong answer, but dont give up", 
+             "try again please!"
+        };
+    return generateAnswer(answers);
 }
 
 void getTwoNumbers(int *pX, int *pY, int largestFirst) {

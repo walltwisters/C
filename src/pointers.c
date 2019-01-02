@@ -1,27 +1,19 @@
 #include <stdio.h>
-void squareNumbers(int []);
  
 int main()
 {
+    char *strNames[5] = {0};
+    char answer[80] = {0};
     int x;
-    int iNumbers[3] = {2, 4, 6};
+    strNames[0] = "Michael";
+    strNames[1] = "Sheila";
+    strNames[2] = "Spencer";
+    strNames[3] = "Hunter";
+    strNames[4] = "Kenya";
  
-    printf("\nThe current array values are: ");
-    for ( x = 0; x < 3; x++ )
-        printf("%d ", iNumbers[x]); //print contents of array
-    printf("\n");
+    printf("\nNames in pointer array of type char:\n\n");
  
-    squareNumbers(iNumbers);
- 
-    printf("\nThe modified array values are: ");
-    for ( x = 0; x < 3; x++ )
-    printf("%d ", iNumbers[x]); //print modified array contents printf("\n");
+    for ( x = 0; x < 5; x++ )
+         printf("%s\n", strNames[x]);
     return 0;
 } //end main
- 
-void squareNumbers(int num[])
-{
-    int x;
-    for ( x = 0; x < 3; x++ )
-        num[x] = num[x] * num[x]; //modify the array contents
-} //end squareNumbers
