@@ -17,3 +17,6 @@ int assertAnswer(int expected, int provided);
 char* correctAnswer();
 char* inCorrectAnswer();
 char* generateAnswer();
+void saveToFile(float result, char *pName, int choice);
+void displayPreviousResults();
+void displayBestResult();

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include "CAIv2.h"
 
 int main(){
@@ -8,7 +9,7 @@ int main(){
     time_t t;
     srand( ( unsigned ) time(&t));
     do{
-        char* choices[] = {"test", "practice", "quit", 0};
+        char* choices[] = {"test", "practice", "results","best result", "quit", 0};
         choice = menu(choices);
         switch(choice){
             case 1:
@@ -18,10 +19,16 @@ int main(){
                 practice();
                 break;
             case 3:
+                displayPreviousResults();
+                break;
+            case 4:
+                displayBestResult();
+                break;
+            case 5:
             default :
                 break;
         } 
-    } while ( choice == 1 || choice == 2);
+    } while ( choice == 1 || choice == 2 || choice == 3 || choice == 4);
     
     return 0;
 }
@@ -41,6 +48,49 @@ int menu(char** ppChoices){
     } while(menuVal < 1 || menuVal > num);
     
     return menuVal;
+}
+
+void displayPreviousResults() {
+    FILE *pStream;
+    char name[80] = {"\0"};
+    char sessionType[80]= {"\0"};
+    float result;
+    pStream = fopen("results.dat", "r");
+    printf("\n\nsessiontype\tname\tresult\n\n");
+    if( pStream == NULL) {
+
+    } else {
+        fscanf(pStream, "%s%s%f",sessionType, name, &result);
+        while( !feof(pStream) ){
+            printf("%s\t%s\t%f\n", sessionType, name, result);
+            fscanf(pStream, "%s%s%f",sessionType, name, &result);
+        }
+        printf("\n\n");
+    }
+}
+
+void displayBestResult() {
+    FILE *pStream;
+    char name[80] = {"\0"};
+    float highestResult = 0;
+    char champion[80] = {"\0"};
+    float result;
+    pStream = fopen("results.dat", "r");
+    printf("\n\n\n");
+    if( pStream == NULL) {
+
+    } else {
+        fscanf(pStream, "%s%f", name, &result);
+        while( !feof(pStream) ){
+            if( result > highestResult){
+                highestResult = result;
+                strcpy(champion, name);
+            }
+            //highestResult= result > highestResult ? result : highestResult;
+            fscanf(pStream, "%s%f",name, &result);
+        }
+        printf("\nhighest result so far is : %f\tby %s\n\n", highestResult, champion);
+    }
 }
 
 void practice(){
@@ -75,6 +125,8 @@ void test(){
     const int subtraction = 2;
     const int mixed = 3;
     int i;
+    float result;
+    char name[80] = {'\0'};
     struct TestAnalysis analysis[numberOfQuestions];
     printf("\nnow you can choose to do test on:\n");
     choice = selectTypeOfQuestions();
@@ -97,7 +149,39 @@ void test(){
         printf("%d.%s\t%d\t%d\n", i + 1, analysis[i].question, analysis[i].correctAnswer, analysis[i].studentAnswer);
         correctAnswers += analysis[i].correctAnswer == analysis[i].studentAnswer ? 1 : 0;
     }
-    printf("\npercentage score is : %0.1f %%\n\n\n", (float) correctAnswers / numberOfQuestions * 100);
+    printf("\npercentage score is : %0.1f %%\n\n\n", result = (float) correctAnswers / numberOfQuestions * 100);
+    printf("add your name: ");
+    scanf("%s", name);
+    saveToFile(result, name, choice);
+}
+
+void saveToFile(float result, char *pName, int choice){
+    FILE *pWrite;
+    char *pType;
+    time_t t = time(NULL);
+    struct tm *tm = localtime(&t);
+    char s[64];
+    strftime(s, sizeof(s), "%c", tm);
+    switch(choice) {
+        case 1:
+            pType = "addition";
+            break;
+        case 2:
+            pType = "subtraction";
+            break;
+        case 3:
+            pType = "mixed";
+            break;
+    }
+    pWrite = fopen("results.dat", "a");
+    if ( pWrite == NULL ) {
+        printf("\nFile not opened\n");
+        //return 1; 
+    }
+    else {
+        fprintf(pWrite, "%s\t%s\t%f\t%s\n", pType, pName, result, s);
+        fclose(pWrite);
+    } 
 }
 
 int selectTypeOfQuestions(){
