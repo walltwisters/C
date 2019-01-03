@@ -9,7 +9,7 @@ int main(){
     time_t t;
     srand( ( unsigned ) time(&t));
     do{
-        char* choices[] = {"test", "practice", "results","best result", "quit", 0};
+        char* choices[] = {"test", "practice", "highscores", "quit", 0};
         choice = menu(choices);
         switch(choice){
             case 1:
@@ -19,18 +19,37 @@ int main(){
                 practice();
                 break;
             case 3:
-                displayPreviousResults();
+                highScores();
                 break;
             case 4:
-                displayBestResult();
-                break;
-            case 5:
             default :
                 break;
         } 
-    } while ( choice == 1 || choice == 2 || choice == 3 || choice == 4);
+    } while ( choice > 0 && choice < 4);
     
     return 0;
+}
+
+void highScores() {
+    char* choices[] = {"all results", "champion", "5 best results", "your results","back", 0 };
+    int choice = menu(choices);
+    switch(choice) {
+        case 1:
+            displayPreviousResults();
+            break;
+        case 2:
+            displayBestResult();
+            break;
+        case 3:
+            display5BestResults();
+            break;
+        case 4:
+            displayMyResults();
+            break;
+        case 5:
+        default:
+            return;
+    }
 }
 
 int menu(char** ppChoices){
@@ -50,47 +69,114 @@ int menu(char** ppChoices){
     return menuVal;
 }
 
-void displayPreviousResults() {
+
+void readResults(void (*cb)(struct ResultRecord*)) {
     FILE *pStream;
-    char name[80] = {"\0"};
-    char sessionType[80]= {"\0"};
-    float result;
+    struct ResultRecord resultRecord;
+
     pStream = fopen("results.dat", "r");
-    printf("\n\nsessiontype\tname\tresult\n\n");
+    
     if( pStream == NULL) {
 
     } else {
-        fscanf(pStream, "%s%s%f",sessionType, name, &result);
-        while( !feof(pStream) ){
-            printf("%s\t%s\t%f\n", sessionType, name, result);
-            fscanf(pStream, "%s%s%f",sessionType, name, &result);
+        while(!feof(pStream)) {
+            resultRecord.result = -1;
+            fscanf(pStream, "%s%s%f%s", resultRecord.testType, resultRecord.name, &resultRecord.result, resultRecord.time);
+            if(resultRecord.result >= 0){
+                (*cb)(&resultRecord);
+            }
+            
         }
-        printf("\n\n");
+    }
+
+}
+
+struct ResultRecord bestResult;
+
+void helper(struct ResultRecord* p) {
+    if (p->result > bestResult.result) {
+        bestResult.result = p->result;
+        strcpy(bestResult.name, p->name);
+        strcpy(bestResult.testType, p->testType);
+        strcpy(bestResult.time, p->time);
     }
 }
 
-void displayBestResult() {
-    FILE *pStream;
-    char name[80] = {"\0"};
-    float highestResult = 0;
-    char champion[80] = {"\0"};
-    float result;
-    pStream = fopen("results.dat", "r");
-    printf("\n\n\n");
-    if( pStream == NULL) {
+void helperWriteResults(struct ResultRecord* p) {
+    printf("%s\t%s\t%0.1f\t%s\n", p->testType, p->name, p->result, p->time);
+}
 
-    } else {
-        fscanf(pStream, "%s%f", name, &result);
-        while( !feof(pStream) ){
-            if( result > highestResult){
-                highestResult = result;
-                strcpy(champion, name);
-            }
-            //highestResult= result > highestResult ? result : highestResult;
-            fscanf(pStream, "%s%f",name, &result);
-        }
-        printf("\nhighest result so far is : %f\tby %s\n\n", highestResult, champion);
+char user[80] = {"\0"};
+
+void helperGetMyResults(struct ResultRecord* p) {
+    if(strcmp(p->name, user) == 0) {
+       printf("%s\t%s\t%0.1f\t%s\n", p->testType, p->name, p->result, p->time);
     }
+}
+
+void displayPreviousResults() {
+    printf("\n\nsessiontype\tname\tresult\ttime\n\n");
+    readResults(helperWriteResults);
+    printf("\n\n");
+}
+
+void displayBestResult() {
+    bestResult.result = -1;
+    readResults(helper);
+    printf("\nhighest result so far is : %0.1f\tby %s\n\n", bestResult.result, bestResult.name);
+} 
+
+void displayMyResults() {
+    printf("\nyour name:");
+    scanf("%s", user);
+    readResults(helperGetMyResults);
+    printf("\n\n");
+}
+
+void copyResultRecord(struct ResultRecord* pTarget, struct ResultRecord* pSource) {
+    pTarget->result = pSource->result;
+    strcpy(pTarget->name, pSource->name);
+    strcpy(pTarget->testType, pSource->testType);
+    strcpy(pTarget->time, pSource->time);
+}
+
+void moveElementsOnePositionBack(struct ResultRecord* pRecords, int size) {
+    for (int i = size - 1; i > 0; i--) {
+        copyResultRecord(pRecords + i, pRecords + i - 1);
+    }
+}
+
+void insertSorted(struct ResultRecord* pRecords, int size, struct ResultRecord* p) {
+    int i = 0;
+    while (i < size) {
+        if (pRecords[i].result < p->result) {
+            moveElementsOnePositionBack(pRecords + i, size - i);
+            copyResultRecord(pRecords + i, p);
+            break;
+        }
+        i++;
+    }
+}
+
+struct ResultRecord fiveBestResults[5];
+
+void helper5Best(struct ResultRecord* p) {
+    insertSorted(fiveBestResults, 5, p);
+}
+
+void display5BestResults() {
+    for (int i = 0; i < 5; i++) {
+        fiveBestResults[i].result = -1;
+    } 
+    readResults(helper5Best);
+
+    for (int i = 0; i < 5; i++) {
+        struct ResultRecord* p = fiveBestResults + i;
+        if (p->result < 0) {
+            break;
+        }
+        printf("%s\t%s\t%0.1f\t%s\n", p->testType, p->name, p->result, p->time);
+    }   
 }
 
 void practice(){
@@ -161,7 +247,7 @@ void saveToFile(float result, char *pName, int choice){
     time_t t = time(NULL);
     struct tm *tm = localtime(&t);
     char s[64];
-    strftime(s, sizeof(s), "%c", tm);
+    strftime(s, sizeof(s), "%Y-%m-%dT%H:%M:%S", tm);
     switch(choice) {
         case 1:
             pType = "addition";
@@ -179,7 +265,7 @@ void saveToFile(float result, char *pName, int choice){
         //return 1; 
     }
     else {
-        fprintf(pWrite, "%s\t%s\t%f\t%s\n", pType, pName, result, s);
+        fprintf(pWrite, "%s\t%s\t%0.1f\t%s\n", pType, pName, result, s);
         fclose(pWrite);
     } 
 }

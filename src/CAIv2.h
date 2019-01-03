@@ -3,6 +3,12 @@ struct TestAnalysis {
     int correctAnswer;
     int studentAnswer;
 };
+struct ResultRecord {
+    char name[80];
+    char time[80];
+    float result;
+    char testType[80]; 
+};
 int menu(char** ppChoices);
 int selectTypeOfQuestions();
 void practice();
@@ -20,3 +26,6 @@ char* generateAnswer();
 void saveToFile(float result, char *pName, int choice);
 void displayPreviousResults();
 void displayBestResult();
+void displayMyResults();
+void display5BestResults();
+void highScores();
